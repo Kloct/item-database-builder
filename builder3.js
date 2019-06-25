@@ -1,12 +1,8 @@
 const path = require('path')
 const fs = require('fs')
-const mysql = require('mysql')
-var pool = mysql.createPool({
-	host: '192.168.1.16',
-	user: 'CJTV',
-	password: 'sxNNlstDm9U2w58U',
-	database: 'trade_broker'
-});
+
+var pool = require('./database')
+
 let patchversion = 7907,
 	StrSheet_Item0 = require('./StrSheet_Item/StrSheet_Item-0.json'),
 	StrSheet_Item1 = require('./StrSheet_Item/StrSheet_Item-1.json'),
@@ -48,54 +44,86 @@ let patchversion = 7907,
 	ItemData16 = require('./ItemData/ItemData-16.json'),
 	ItemData17 = require('./ItemData/ItemData-17.json'),
 	ItemData18 = require('./ItemData/ItemData-18.json'),
-	ItemData19 = require('./ItemData/ItemData-19.json'),
-	StrSheet,
-	StrSheetArray = [],
-	ItemData,
-	ItemDataArray = [],
-	currentItemData,
-	currentStrSheet
-//retrieve current tables from database
-buildData(function(){
-	createStrTable(`CREATE TABLE strsheet_item_${patchversion} SELECT ? FROM strsheet_item WHERE 1=2;`, function(){
-		createStrTable(`CREATE TABLE itemdata_${patchversion} SELECT ? FROM itemdata WHERE 1=2;`, function(){
-			pushStrSheet(`INSERT INTO strsheet_item${patchversion}(?) VALUES ?`, function(){
-				console.log('Done.')
-				pushItemData(`INSERT INTO itemdata${patchversion}(?) VALUES ?`, function(){
-					console.log('Done.')
-					console.log('Finished export.')
-					process.exit(0)
-				})
-			})
-		})
-	})
-	
-})
+	ItemData19 = require('./ItemData/ItemData-19.json')
+
+//main async function
+builder();
+async function builder(){
+	let strSheet = await buildStrSheet();
+	let itemData = await buildItemData();
+	let resultStr = await pool.query(`INSERT INTO strsheet_1 (${strSheet.keys}) VALUES ?`, [strSheet.parsed]);
+	let resultData = await pool.query(`INSERT INTO itemdata_1 (${itemData.keys}) VALUES ?`, [itemData.parsed]);
+	console.log(`\nImport completed
+		\nAdded: ${resultStr.affectedRows} rows to strsheet
+		\nAdded: ${resultData.affectedRows} rows to itemdata`);
+	process.exit(0)
+}
+
 //build new dataset
-function buildData(callback){
-	StrSheet = StrSheet_Item0.String.concat(StrSheet_Item1.String/*,StrSheet_Item2.String*/,StrSheet_Item3.String,StrSheet_Item4.String,StrSheet_Item5.String,StrSheet_Item6.String,StrSheet_Item7.String,StrSheet_Item8.String,StrSheet_Item9.String,StrSheet_Item10.String,StrSheet_Item11.String,StrSheet_Item12.String,StrSheet_Item13.String,StrSheet_Item14.String,StrSheet_Item15.String,StrSheet_Item16.String,StrSheet_Item17.String,StrSheet_Item18.String,StrSheet_Item19.String/*,StrSheet_Item20.String*/)
-	ItemData = ItemData0.Item.concat(ItemData1.Item/*,ItemData2.Item*/,ItemData3.Item,ItemData4.Item,ItemData5.Item,ItemData6.Item,ItemData7.Item,ItemData8.Item,ItemData9.Item,ItemData10.Item,ItemData11.Item,ItemData12.Item,ItemData13.Item,ItemData14.Item,ItemData15.Item,ItemData16.Item,ItemData17.Item,ItemData18.Item,ItemData19.Item)
-	for (i=0;i<StrSheet.length;i++){
-		if(checkUnique(StrSheet[i].id, StrSheetArray)){
-			StrSheetArray.push(Object.values(StrSheet[i]))
+async function buildStrSheet(){
+	let dbStrSheet = await pool.query('SELECT * FROM strsheet_1;')
+	let	strSheetParsed = [],
+		StrSheet = StrSheet_Item0.String.concat(StrSheet_Item1.String/*,StrSheet_Item2.String*/,StrSheet_Item3.String,StrSheet_Item4.String,StrSheet_Item5.String,StrSheet_Item6.String,StrSheet_Item7.String,StrSheet_Item8.String,StrSheet_Item9.String,StrSheet_Item10.String,StrSheet_Item11.String,StrSheet_Item12.String,StrSheet_Item13.String,StrSheet_Item14.String,StrSheet_Item15.String,StrSheet_Item16.String,StrSheet_Item17.String,StrSheet_Item18.String,StrSheet_Item19.String/*,StrSheet_Item20.String*/)
+		for (i=0;i<200;i++){
+			if(checkUnique(StrSheet[i], strSheetParsed, dbStrSheet)){
+				strSheetParsed.push([
+					StrSheet[i].id,
+					StrSheet[i].toolTip,
+					StrSheet[i].string,
+					patchversion
+				]);
+			}
+			if (i % 1000==0)(printProgress(i, "k items from StrSheet processed"))
 		}
-		if (i % 1000==0)(printProgress(i, "k items from StrSheet processed"))
-	}
-	for (i=0;i<ItemData.length;i++){
-		if(checkUnique(ItemData[i].id, ItemDataArray)){
-			ItemDataArray.push(Object.values(ItemData[i]));
+	return ({
+		keys: '`id`, `toolTip`, `string`, `patchversion`',
+		parsed: strSheetParsed
+	});
+}
+async function buildItemData(){
+	let dbItemData = await pool.query('SELECT * FROM itemdata_1;')
+	let	itemDataParsed = [],
+		ItemData = ItemData0.Item.concat(ItemData1.Item/*,ItemData2.Item*/,ItemData3.Item,ItemData4.Item,ItemData5.Item,ItemData6.Item,ItemData7.Item,ItemData8.Item,ItemData9.Item,ItemData10.Item,ItemData11.Item,ItemData12.Item,ItemData13.Item,ItemData14.Item,ItemData15.Item,ItemData16.Item,ItemData17.Item,ItemData18.Item,ItemData19.Item)
+	for (i=0;i<200;i++){
+		if(checkUnique(ItemData[i], itemDataParsed, dbItemData)){
+			itemDataParsed.push([
+				ItemData[i].id,
+				patchversion,
+				JSON.stringify(ItemData[i])
+			]);
 		}
-		if (i % 1000==0)(printProgress(i, "k items from ItemData processed\n"))
+		if (i % 1000==0)(printProgress(i, "k items from ItemData processed"))
 	}
-	callback();
+	return ({
+		keys: '`id`, `patchversion`, `properties`',
+		parsed:itemDataParsed
+	});
 }
 //check if data is unique
-function checkUnique(newData, currData){
+function checkUnique(newData, currData, dbData){
 	let unique = true
 	for (k=0;k<currData.length;k++){
-		if (newData==currData[k][0]){
+		if (newData.id==currData[k][0]){
 			unique = false;
 			break;
+		}
+	}
+	if(unique){
+		
+		for (l=0;l<dbData.length;l++){
+			if(Object.values(dbData[l].length!==Object.values(newData).length)){
+				unique=false;
+				break
+			}
+			else {
+				//check if arrays are equal
+				for(var i = Object.values(dbData[l]).length; i--;){
+					if(Object.values(dbData[l])[i] !== newData[i]){
+						unique=false;
+						break;
+					}
+				}
+			}
 		}
 	}
 	return unique;
@@ -105,35 +133,4 @@ function printProgress(progress, string){
     process.stdout.clearLine();
     process.stdout.cursorTo(0);
     process.stdout.write(progress/1000 + string);
-}
-//push unique data
-function createStrTable (sql, callback){
-	pool.query(sql, Object.keys(StrSheetArray), function(err, result){
-		if (err) throw err;
-		console.log(`created strsheet_item_${patchversion}`)
-	})
-	callback();
-}
-function createItemTable(sql, callback){
-	pool.query(sql, Object.keys(ItemDataArray), function(err, result){
-		if (err) throw err;
-		console.log(`created itemdata_${patchversion}`)
-	})
-	callback();
-}
-function pushStrSheet(sql, callback){
-	console.log(`Inserting ${StrSheetArray.length} rows into strsheet_item_${patchversion}`);
-	pool.query(sql, Object.keys(StrSheetArray),[StrSheetArray], function(err, result){
-		if (err) throw err;
-		console.log("StrSheet_Item Items Added: " + result.affectedRows + "!");
-	});
-	callback();
-}
-function pushItemData(sql, callback){
-	console.log(`Inserting ${StrSheetArray.length} rows into strsheet_item_${patchversion}`);
-	pool.query(sql, Object.keys(ItemDataArray), [ItemDataArray], function(err, result){
-		if (err) throw err;
-		console.log("Itemdata Items Added: " + result.affectedRows + "!");
-	});
-	callback();
 }
