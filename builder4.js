@@ -27,30 +27,22 @@ function parseColumnName(data){
   return columns
 }
 
-function parseColumnType(mergedData, columnNames){
-  let data = []
-  //go though all columns
-  for(h=0;h>columnNames.length;h++){
+function parseColumnType(merged, headers){
+  let types = [],
+  //go though all headers
+  for(h=0;h<headers.length;h++){
     //go though all items
-    for(i=0;i<mergedData.length;i++){
-      let found = false
-      //go though all properties
-      for(j=0;j<Object.keys(mergedData[i]).length;j++){
-        if (Object.keys(mergedData[i])[j]=item){
-          data = data.push(typeof mergedData[i][item])
-          found = true
-          //break when found item
-          break;
-        }
-      }
-      if (found){
+    for(i=0;i<merged.length;i++){
+      //does property exist?
+      if(merged[i][headers[h]]){
+        types.push(typeof merged[i][headers[h]])
         break;
       }
-      //need break when found item
     }
   }
-  return data
+  return types
 }
+
 function unique (a, b) {
   a = a.concat(b.filter(item => {
     return a.indexOf(item) < 0;
@@ -84,7 +76,7 @@ async function buildData(){
   console.log(`====================`)
   let headersStringsType = await parseColumnType(mergedStrings, headersStrings),
   headersDataType = await parseColumnType(mergedData, headersData)
-  console.log('Got Headers')
+  console.log('Got Header Type')
   console.log(`headersStringsType: ${headersStringsType}`)
   console.log(`headersDataType: ${headersDataType}`)
 
