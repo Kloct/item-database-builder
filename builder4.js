@@ -9,6 +9,7 @@ function populateData(dir) {
   let fileCount = fs.readdirSync( dir(0).match('(?:.*?\/){2}')[0] ).length,
     objKey = Object.keys(require(dir(0)))[0],
     mergedList = []
+  // concat all arrays from each file into one
   for (i=0;i<fileCount;i++){
     if(Object.entries(require(dir(i))).length !== 0){
       mergedList = mergedList.concat(require(dir(i))[objKey])
@@ -20,23 +21,39 @@ function populateData(dir) {
 //parse headers for db columns
 
 function parseColumnName(data){
-  //Combine all properties into one array
+  //Combine all properties into one unique array
   let headersUnformatted = Object.entries(Object.assign({}, ...data)),
     headersFormatted = []
 
   // Format array for database
   for(i=0;i<headersUnformatted.length;i++){
-    if (typeof headersUnformatted[i][1]==="number") headersUnformatted[i][1]="int(11)"
-    else if (typeof headersUnformatted[i][1]==="string") headersUnformatted[i][1]="varchar(50)"
-    else if (typeof headersUnformatted[i][1]==="boolean") headersUnformatted[i][1]="bit"
-    else console.error(`Unhandled column type: ${typeof headersUnformatted[i][1]} in ${headersUnformatted[i][0]}`)
+    typeof headersUnformatted[i][1]==="number" ? headersUnformatted[i][1]="int(11)"
+    : typeof headersUnformatted[i][1]==="string" ? headersUnformatted[i][1]="varchar(50)"
+    : typeof headersUnformatted[i][1]==="boolean" ? headersUnformatted[i][1]="bit"
+    : console.error(`Unhandled column type: ${typeof headersUnformatted[i][1]} in ${headersUnformatted[i][0]}`)
     headersFormatted.push(`${headersUnformatted[i][0]} ${headersUnformatted[i][1]}`)
   }
 return headersFormatted
 }
+function formatData(data){
+  //needs to be much more complex than this
+  // not every item has a every property
+  // need to null item properties that don't exist
+  // maybe loop through and format via existing schema?
+  return data.map(i=>Object.values(i)).flat(1)
+}
 
-function createTableStatements(data){
-
+let checkfinished = 0
+function finishedInserts(type, result){
+  console.log(`Finished Inserting data into ${type}!`)
+  console.log(`Affected Rows: ${result}`)
+  checkedfinished++
+  if (checkfinished==2){
+    console.log(`====================\n
+    Finished Imports of all data\n
+    Newly created data located itemStrings${patchversion} and itemData${patchversion}`)
+    process.exit(0)
+  }
 }
 
 /*//////////////
@@ -51,19 +68,41 @@ async function buildData(){
   console.log(`mergedData: ${mergedData.length}`)
 
   console.log(`====================`)
-  let headersStrings = parseColumnName(mergedStrings),
-  headersData = parseColumnName(mergedData)
+  let itemStringsSchema = parseColumnName(mergedStrings),
+  itemDataSchema = parseColumnName(mergedData)
   console.log('Got Headers')
-  console.log(`headersStrings: ${headersStrings.length}`)
-  console.log(`headersData: ${headersData.length}`)
+  console.log(`headersStrings: ${itemStringsSchema.length}`)
+  console.log(`headersData: ${itemDataSchema.length}`)
 
   console.log(`====================`)
-  console.log(`Would start to initialize database schema here`)
+  let itemStrings = formatData(mergedStrings),
+  itemData = formatData(mergedData)
+  console.log(`Formatted itemStrings. Size: ${itemStrings.length}`)
+  console.log(`Formatted itemData. Size: ${itemData.length}`)
 
   console.log(`====================`)
-  console.log(`Would populate newly created tables here`)
+  console.log(`Initializing Schema...`)
+  pool.query(`CREATE TABLE itemStrings${patchversion} (${itemStringsSchema})`, (err)=>{
+    if(err) throw err;
+    //console.log(`Created itemStrings${patchversion}!`)
+    //console.log(`Inserting Item Strings...`)
 
-  process.exit(0);
+    /*pool.query(`INSERT INTO itemStrings${patchversion} (${itemStringsSchema}) VALUES(${itemStrings})`, (err, res)=>{
+      if (err) throw err;
+      //finishedInserts(`itemData${patchversion}`, res.affectedRows)
+    })*/
+
+  })
+  /*pool.query(`CREATE TABLE itemData${patchversion} (${itemDataSchema})`, (err)=>{
+    if(err) throw err;
+    //console.log(`Created itemData${patchversion}!`)
+    //console.log(`Inserting Item Data...`)
+
+    pool.query(`INSERT INTO itemData${patchversion} (${itemDataSchema}) VALUES (${itemData})`, (err, res)=>{
+      //if (err) throw err;
+      //finishedInserts(`itemData${patchversion}`, res.affectedRows)
+    })
+  })*/
 }
 
 buildData();
