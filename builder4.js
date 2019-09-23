@@ -36,11 +36,15 @@ function parseColumnName(data){
 return headersFormatted
 }
 function formatData(data){
-  //needs to be much more complex than this
-  // not every item has a every property
-  // need to null item properties that don't exist
-  // maybe loop through and format via existing schema?
-  return data.map(i=>Object.values(i)).flat(1)
+  let formattedData = [],
+    schema = Object.keys(Object.assign({}, ...data))
+  
+  data.map(i=>{
+    schema.map(p=>{
+      i[p] ? formattedData.push(i[p]) : formattedData.push("NULL")
+    })
+  })
+  return formattedData
 }
 
 let checkfinished = 0
@@ -81,16 +85,18 @@ async function buildData(){
   console.log(`Formatted itemData. Size: ${itemData.length}`)
 
   console.log(`====================`)
+  console.log(`Done for now`)
+  process.exit(0)
   console.log(`Initializing Schema...`)
-  pool.query(`CREATE TABLE itemStrings${patchversion} (${itemStringsSchema})`, (err)=>{
+  /*pool.query(`CREATE TABLE itemStrings${patchversion} (${itemStringsSchema})`, (err)=>{
     if(err) throw err;
-    //console.log(`Created itemStrings${patchversion}!`)
-    //console.log(`Inserting Item Strings...`)
+    console.log(`Created itemStrings${patchversion}!`)
+    console.log(`Inserting Item Strings...`)
 
-    /*pool.query(`INSERT INTO itemStrings${patchversion} (${itemStringsSchema}) VALUES(${itemStrings})`, (err, res)=>{
-      if (err) throw err;
+    pool.query(`INSERT INTO itemStrings${patchversion} (${itemStringsSchema}) VALUES(${itemStrings})`, (err, res)=>{
+      //if (err) throw err;
       //finishedInserts(`itemData${patchversion}`, res.affectedRows)
-    })*/
+    })
 
   })
   /*pool.query(`CREATE TABLE itemData${patchversion} (${itemDataSchema})`, (err)=>{
