@@ -1,0 +1,304 @@
+id
+category
+coolTime
+level
+name
+icon
+rank
+maxStack
+rareGrade
+requiredEquipmentType
+combatItemType
+equipSound
+artisanable
+boundType
+buyPrice
+changeColorEnable
+changeLook
+coolTimeGroup
+CTcategory
+defaultValue
+destroyable
+dismantlable
+dropSilhouette
+dropSound
+dropType
+enchantEnable
+extractLook
+guildWarehouseStorable
+linkCrestId
+linkCustomizingId
+int(11)
+linkEquipmentId
+linkLookInfoId
+linkPetAdultId
+linkPetOrbId
+linkSkillId
+masterpieceRate
+obtainable
+searchable
+sellPrice
+slotLimit
+sortingNumber
+storeSellable
+tradable
+unidentifiedItemGrade
+useOnlyTerritory
+warehouseStorable
+usedSound
+requiredUserStatus
+requiredMaxLevel
+requiredLevel
+linkMasterpiecePassivityId
+linkPassivityId
+requiredGuildLevel
+linkChangeColorListId
+itemMixId
+changeEnchantFxId
+dropIdentify
+itemLevelGageOn
+linkEnchantId
+linkMasterpieceEnchantId
+linkMasterpiecePassivityCategoryId
+linkMaterialEnchantId
+linkPassivityCategoryId
+masterpieceBasicStatRevise
+requiredClass
+mediate
+mediateCount
+dropEffect
+isReputation
+accessoryColorId
+periodByWebAdmin
+periodInMinute
+periodItemCategoryId
+combatItemArg1
+linkSkillPeriodDay
+gambleItemGrade
+conversionSmallGroup
+gambleItemType
+ridingUseable
+enchantEquipPart
+dropEffectOnlyWhenMine
+isPvpEquipment
+preSetEnchant
+linkEquipmentExpId
+combatItemArg3
+combatItemArg4
+awakenable
+unbindCount
+unbindEnchant
+onlyForPCBang
+uniqueEquippedItem
+optionResetDisable
+dualOptionAble
+requiredGender
+requiredRace
+styleCostumeId
+linkRawStoneId
+linkSocialId
+customizingString
+combatItemArg5
+id
+category
+coolTime
+level
+name
+icon
+rank
+maxStack
+rareGrade
+requiredEquipmentType
+combatItemType
+equipSound
+artisanable
+boundType
+buyPrice
+changeColorEnable
+changeLook
+coolTimeGroup
+CTcategory
+defaultValue
+destroyable
+dismantlable
+dropSilhouette
+dropSound
+dropType
+enchantEnable
+extractLook
+guildWarehouseStorable
+linkCrestId
+linkCustomizingId
+linkEquipmentId
+linkLookInfoId
+linkPetAdultId
+linkPetOrbId
+linkSkillId
+masterpieceRate
+obtainable
+searchable
+sellPrice
+slotLimit
+sortingNumber
+storeSellable
+tradable
+unidentifiedItemGrade
+useOnlyTerritory
+warehouseStorable
+usedSound
+requiredUserStatus
+requiredMaxLevel
+requiredLevel
+linkMasterpiecePassivityId
+linkPassivityId
+requiredGuildLevel
+linkChangeColorListId
+itemMixId
+changeEnchantFxId
+dropIdentify
+itemLevelGageOn
+linkEnchantId
+linkMasterpieceEnchantId
+linkMasterpiecePassivityCategoryId
+linkMaterialEnchantId
+linkPassivityCategoryId
+masterpieceBasicStatRevise
+requiredClass
+mediate
+mediateCount
+dropEffect
+isReputation
+accessoryColorId
+periodByWebAdmin
+periodInMinute
+periodItemCategoryId
+combatItemArg1
+linkSkillPeriodDay
+gambleItemGrade
+conversionSmallGroup
+gambleItemType
+ridingUseable
+enchantEquipPart
+dropEffectOnlyWhenMine
+isPvpEquipment
+preSetEnchant
+linkEquipmentExpId
+combatItemArg3
+combatItemArg4
+awakenable
+unbindCount
+unbindEnchant
+onlyForPCBang
+uniqueEquippedItem
+optionResetDisable
+dualOptionAble
+unionVenderTradeable
+requiredGender
+requiredRace
+styleCostumeId
+linkRawStoneId
+linkSocialId
+customizingString
+combatItemArg5
+
+
+id int(11)
+category varchar(50)
+coolTime int(11)
+level int(11)
+name varchar(50)
+icon varchar(50)
+rank int(11)
+maxStack int(11)
+rareGrade int(11)
+requiredEquipmentType varchar(50)
+combatItemType varchar(50)
+equipSound varchar(50)
+artisanable bit
+boundType varchar(50)
+buyPrice varchar(50)
+changeColorEnable bit
+changeLook bit
+coolTimeGroup int(11)
+CTcategory varchar(50)
+defaultValue int(11)
+destroyable bit
+dismantlable bit
+dropSilhouette varchar(50)
+dropSound varchar(50)
+dropType int(11)
+enchantEnable bit
+extractLook bit
+guildWarehouseStorable bit
+linkCrestId int(11)
+linkCustomizingId int(11)
+linkEquipmentId int(11)
+linkLookInfoId int(11)
+linkPetAdultId int(11)
+linkPetOrbId int(11)
+linkSkillId int(11)
+masterpieceRate int(11)
+obtainable bit
+searchable bit
+sellPrice varchar(50)
+slotLimit int(11)
+sortingNumber int(11)
+storeSellable bit
+tradable bit
+unidentifiedItemGrade int(11)
+useOnlyTerritory bit
+warehouseStorable bit
+usedSound varchar(50)
+requiredUserStatus varchar(50)
+requiredMaxLevel int(11)
+requiredLevel int(11)
+linkMasterpiecePassivityId varchar(50)
+linkPassivityId varchar(50)
+requiredGuildLevel int(11)
+linkChangeColorListId int(11)
+itemMixId int(11)
+changeEnchantFxId int(11)
+dropIdentify bit
+itemLevelGageOn bit
+linkEnchantId int(11)
+linkMasterpieceEnchantId int(11)
+linkMasterpiecePassivityCategoryId varchar(50)
+linkMaterialEnchantId int(11)
+linkPassivityCategoryId varchar(50)
+masterpieceBasicStatRevise varchar(50)
+requiredClass varchar(50)
+mediate varchar(50)
+mediateCount int(11)
+dropEffect varchar(50)
+isReputation bit
+accessoryColorId varchar(50)
+periodByWebAdmin bit
+periodInMinute int(11)
+periodItemCategoryId int(11)
+combatItemArg1 int(11)
+linkSkillPeriodDay int(11)
+gambleItemGrade int(11)
+conversionSmallGroup int(11)
+gambleItemType varchar(50)
+ridingUseable bit
+enchantEquipPart varchar(50)
+dropEffectOnlyWhenMine bit
+isPvpEquipment bit
+preSetEnchant int(11)
+linkEquipmentExpId int(11)
+combatItemArg3 int(11)
+combatItemArg4 varchar(50)
+awakenable bit
+unbindCount int(11)
+unbindEnchant int(11)
+onlyForPCBang bit
+uniqueEquippedItem bit
+optionResetDisable bit
+dualOptionAble bit
+requiredGender varchar(50)
+requiredRace varchar(50)
+styleCostumeId int(11)
+linkRawStoneId int(11)
+linkSocialId int(11)
+customizingString bit
+combatItemArg5 varchar(50)

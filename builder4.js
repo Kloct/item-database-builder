@@ -1,6 +1,7 @@
 const pool = require('./database')
 const fs = require('fs')
 let patchversion = 7907,
+  batchSize = 1000
   stringsDir = (page) =>`./StrSheet_Item/StrSheet_Item-${page}.json`,
   dataDir = (page) =>`./ItemData/ItemData-${page}.json`
 
@@ -25,39 +26,62 @@ function parseColumnName(data){
   let headersUnformatted = Object.entries(Object.assign({}, ...data)),
     headersFormatted = []
 
-  // Format array for database
+  //Format array for database
   for(i=0;i<headersUnformatted.length;i++){
     typeof headersUnformatted[i][1]==="number" ? headersUnformatted[i][1]="int(11)"
-    : typeof headersUnformatted[i][1]==="string" ? headersUnformatted[i][1]="varchar(50)"
+    : headersUnformatted[i][0]==="toolTip" ? headersUnformatted[i][1]="varchar(1000)"
+    : typeof headersUnformatted[i][1]==="string" ? headersUnformatted[i][1]="varchar(200)"
     : typeof headersUnformatted[i][1]==="boolean" ? headersUnformatted[i][1]="bit"
     : console.error(`Unhandled column type: ${typeof headersUnformatted[i][1]} in ${headersUnformatted[i][0]}`)
     headersFormatted.push(`${headersUnformatted[i][0]} ${headersUnformatted[i][1]}`)
   }
 return headersFormatted
 }
-function formatData(data){
+function formatData(data, offset){
   let formattedData = [],
     schema = Object.keys(Object.assign({}, ...data))
-  
+
+  //for every item, check if property exists: if it does push value if not push null
+  // edit to be an array of arrays
+  data.map
   data.map(i=>{
+    let item = []
     schema.map(p=>{
-      i[p] ? formattedData.push(i[p]) : formattedData.push("NULL")
+      i[p] ? item.push(i[p]) : item.push(null)
     })
+    formattedData.push(item)
   })
-  return formattedData
+  //split data into chunks
+  let batchedData = []
+  for (b=0;b<formattedData.length;b+=batchSize){
+    chunk=formattedData.slice(b, b+batchSize);
+    batchedData.push(chunk)
+  }
+  return batchedData
+  //return formattedData
 }
 
-let checkfinished = 0
-function finishedInserts(type, result){
-  console.log(`Finished Inserting data into ${type}!`)
-  console.log(`Affected Rows: ${result}`)
-  checkedfinished++
-  if (checkfinished==2){
-    console.log(`====================\n
-    Finished Imports of all data\n
-    Newly created data located itemStrings${patchversion} and itemData${patchversion}`)
-    process.exit(0)
+function batchInsert(tableName, schema, data){
+  // insert chunks one at a time into database
+  /*pool.query(`INSERT INTO ${tableName} (${schema}) VALUES ?`,[data[0]], (err, res)=>{
+    if (err) throw err;
+  })*/
+  console.log(`Inserting Data into ${tableName}.`)
+  let rowProgress = 0
+  for (c=0;c<data.length;c++){
+    pool.query(`INSERT INTO ${tableName} (${schema}) VALUES ?`, [data[c]], (err, res)=>{
+      if (err) throw err;
+      rowProgress++
+      printProgress(`${rowProgress} of ${data.length} batches inserted into ${tableName}`)
+      if(rowProgress==89) console.log(`\nDone Inserting ${tableName}!`)
+    })
   }
+}
+
+function printProgress(string){
+  process.stdout.clearLine();
+  process.stdout.cursorTo(0);
+  process.stdout.write(string);
 }
 
 /*//////////////
@@ -85,30 +109,21 @@ async function buildData(){
   console.log(`Formatted itemData. Size: ${itemData.length}`)
 
   console.log(`====================`)
-  console.log(`Done for now`)
-  process.exit(0)
+  //console.log(`Done for now`)
+  //process.exit(0)
+
+  //need to add support for batching inserts
   console.log(`Initializing Schema...`)
-  /*pool.query(`CREATE TABLE itemStrings${patchversion} (${itemStringsSchema})`, (err)=>{
+  pool.query(`CREATE TABLE itemStrings${patchversion} (${itemStringsSchema})`, (err)=>{
     if(err) throw err;
     console.log(`Created itemStrings${patchversion}!`)
-    console.log(`Inserting Item Strings...`)
-
-    pool.query(`INSERT INTO itemStrings${patchversion} (${itemStringsSchema}) VALUES(${itemStrings})`, (err, res)=>{
-      //if (err) throw err;
-      //finishedInserts(`itemData${patchversion}`, res.affectedRows)
-    })
-
+    batchInsert(`itemStrings${patchversion}`, Object.keys(Object.assign({}, ...mergedStrings)), itemStrings)
   })
-  /*pool.query(`CREATE TABLE itemData${patchversion} (${itemDataSchema})`, (err)=>{
+  pool.query(`CREATE TABLE itemData${patchversion} (${itemDataSchema})`, (err)=>{
     if(err) throw err;
-    //console.log(`Created itemData${patchversion}!`)
-    //console.log(`Inserting Item Data...`)
-
-    pool.query(`INSERT INTO itemData${patchversion} (${itemDataSchema}) VALUES (${itemData})`, (err, res)=>{
-      //if (err) throw err;
-      //finishedInserts(`itemData${patchversion}`, res.affectedRows)
-    })
-  })*/
+    console.log(`Created itemData${patchversion}!`)
+    batchInsert(`itemData${patchversion}`, Object.keys(Object.assign({}, ...mergedData)), itemData)
+  })
 }
 
 buildData();

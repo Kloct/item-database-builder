@@ -3,9 +3,9 @@ var mysql = require('mysql'),
     
 var pool = mysql.createPool({
     connectionLimit: 10,
-    host: 'localhost',
-    user: 'root',
-    password: 'sxNNlstDm9U2w58U',
+    host: '192.168.0.12',
+    user: 'kloct',
+    password: 'm3GMBU3uw6w8u6T5',
     database: 'trade_broker'
 })
 
