@@ -1,4 +1,6 @@
-foo = [
+var Benchmark = require('benchmark');
+var suite = new Benchmark.Suite;
+var foo = [
 	{
 		"a":1,
 		"b":3,
@@ -19,7 +21,7 @@ foo = [
 		"d":6
 	}
 ]
-function bar (data) {
+function oldFilter (data) {
 	let schema = Object.keys(Object.assign({}, ...data))
 	let ids = new Set(data.map(i=>i.a))
 	let formattedData = []
@@ -32,8 +34,32 @@ function bar (data) {
 			formattedData.push(item);
 		} 
 	})
-	console.log(ids)
-	console.log(formattedData)
+	return formattedData
 }
-
-bar(foo);
+function newFilter (data) {
+	let schema = Object.keys(Object.assign({}, ...data))
+	let ids = new Set(data.map(i=>i.a))
+	let formattedData = data.map(i=>{
+		if(ids.delete(i.a)) return i;
+	})
+	/*formattedData.forEach(i=>{
+		schema.map(p=>{
+			if(i[p]) return i[p]
+			return i[p]=null
+		})
+	})*/
+	console.log(formattedData)
+	//return true
+}
+newFilter(foo)
+/*suite
+	.add('Old Filter', ()=>{
+		oldFilter(foo)
+	})
+	.add('New Filter', ()=>{
+		newFilter(foo)
+	})
+	.on('cycle', e=>{
+		console.log(String(e.target));
+	})
+	.run()*/

@@ -111,7 +111,7 @@ async function buildData(){
 	console.log(`Formatted itemStrings. Size: ${itemStrings.length}`)
 	console.log(`Formatted itemData. Size: ${itemData.length}`)
 
-	console.log(`====================`)
+	/*console.log(`====================`)
 	//console.log(`Done for now`)
 	//process.exit(0)
 
@@ -126,7 +126,7 @@ async function buildData(){
 		if(err) throw err;
 		console.log(`Created itemData${patchversion}!`)
 		batchInsert(`itemData${patchversion}`, Object.keys(Object.assign({}, ...mergedData)), itemData)
-	})
+	})*/
 }
 
 buildData();
